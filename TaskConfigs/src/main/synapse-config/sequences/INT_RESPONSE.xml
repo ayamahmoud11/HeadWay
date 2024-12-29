@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="INT_RESPONSE" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+    <log level="custom">
+        <property name="INT_RESPONSE" value="Starting INT_RESPONSE Sequence"/>
+    </log>
+    <property expression="json-eval($)" name="Message" scope="default" type="STRING"/>
+    <property expression="get-property('requestId')" name="RequestId" scope="default" type="STRING"/>
+    <property expression="get-property('REST_METHOD')" name="HttpMethod" scope="default" type="STRING"/>
+    <property name="FlowType" scope="default" type="STRING" value="INT_RESPONSE"/>
+    <property name="Param2" scope="default" type="STRING" value="userManagementAPI"/>
+    <property name="Source" scope="default" type="STRING" value="DataBase"/>
+    <property name="Destination" scope="default" type="STRING" value="MI"/>
+    <dbreport description="Log INT_RESPONSE audit data into Audit table">
+        <connection>
+            <pool>
+                <driver>com.mysql.cj.jdbc.Driver</driver>
+                <url>jdbc:mysql://localhost:3306/user_management</url>
+                <user>root</user>
+                <password>Aya1mahmoud?</password>
+            </pool>
+        </connection>
+        <statement>
+            <sql><![CDATA[
+                INSERT INTO Audit (
+                    CorrelationId, Message, FlowType, ServiceName, Source, Destination, Param1, Param2, Param3, Param4, Param5
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            ]]></sql>
+            <parameter expression="get-property('requestId')" type="VARCHAR"/>
+            <parameter expression="get-property('Message')" type="VARCHAR"/>
+            <parameter expression="get-property('FlowType')" type="VARCHAR"/>
+            <parameter expression="get-property('HttpMethod')" type="VARCHAR"/>
+            <parameter expression="get-property('Source')" type="VARCHAR"/>
+            <parameter expression="get-property('Destination')" type="VARCHAR"/>
+            <parameter expression="get-property('uri.var.userId')" type="VARCHAR"/>
+            <parameter expression="get-property('HttpMethod')" type="VARCHAR"/>
+            <parameter expression="get-property('Response-Content-Type')" type="VARCHAR"/>
+            <parameter type="VARCHAR" value="N/A"/>
+            <parameter type="VARCHAR" value="N/A"/>
+        </statement>
+    </dbreport>
+    <log level="custom">
+        <property name="INT_RESPONSE" value="INT_RESPONSE Completed"/>
+    </log>
+</sequence>

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<api context="/userManagement" name="userManagementAPI" xmlns="http://ws.apache.org/ns/synapse">
+    <resource methods="POST" protocol="http" uri-template="/users">
+        <inSequence>
+            <property expression="get-property('transport', 'activityid')" name="requestId" scope="default" type="STRING"/>
+            <sequence key="AuditSequence"/>
+            <property expression="json-eval($.username)" name="username" scope="default" type="STRING"/>
+            <property expression="json-eval($.email)" name="email" scope="default" type="STRING"/>
+            <sequence key="INT_REQUEST"/>
+            <dbreport description="Insert User into Database">
+                <connection>
+                    <pool>
+                        <driver>com.mysql.cj.jdbc.Driver</driver>
+                        <url>jdbc:mysql://localhost:3306/user_management</url>
+                        <user>root</user>
+                        <password>Aya1mahmoud?</password>
+                    </pool>
+                </connection>
+                <statement>
+                    <sql><![CDATA[INSERT INTO users (username, email) VALUES (?, ?);]]></sql>
+                    <parameter expression="get-property('username')" type="VARCHAR"/>
+                    <parameter expression="get-property('email')" type="VARCHAR"/>
+                </statement>
+            </dbreport>
+            <payloadFactory description="Set Response" media-type="json">
+                <format>{ "status": "User added successfully." }</format>
+                <args/>
+            </payloadFactory>
+            <sequence key="INT_RESPONSE"/>
+            <sequence key="AuditResponseSequence"/>
+            <respond/>
+        </inSequence>
+        <outSequence>
+            <respond/>
+        </outSequence>
+        <faultSequence>
+            <sequence key="AuditFaultSequence"/>
+        </faultSequence>
+    </resource>
+    <resource methods="GET" protocol="http" uri-template="/users/{userId}">
+        <inSequence>
+            <property expression="get-property('transport', 'activityid')" name="requestId" scope="default" type="STRING"/>
+            <sequence key="AuditSequence"/>
+            <property description="Get ID" expression="get-property('uri.var.userId')" name="userId" scope="default" type="STRING"/>
+            <sequence key="INT_REQUEST"/>
+            <dblookup>
+                <connection>
+                    <pool>
+                        <driver>com.mysql.cj.jdbc.Driver</driver>
+                        <url>jdbc:mysql://localhost:3306/user_management</url>
+                        <user>root</user>
+                        <password>Aya1mahmoud?</password>
+                    </pool>
+                </connection>
+                <statement>
+                    <sql><![CDATA[SELECT username, email FROM users WHERE userId = ?;]]></sql>
+                    <parameter expression="get-property('userId')" type="INTEGER"/>
+                    <result column="email" name="email"/>
+                    <result column="username" name="username"/>
+                </statement>
+            </dblookup>
+            <payloadFactory media-type="json">
+                <format>{ "username": "$1", "email": "$2" }</format>
+                <args>
+                    <arg evaluator="xml" expression="get-property('username')"/>
+                    <arg evaluator="xml" expression="get-property('email')"/>
+                </args>
+            </payloadFactory>
+            <sequence key="INT_RESPONSE"/>
+            <sequence key="AuditResponseSequence"/>
+            <respond/>
+        </inSequence>
+        <outSequence>
+            <respond/>
+        </outSequence>
+        <faultSequence>
+            <sequence key="AuditFaultSequence"/>
+        </faultSequence>
+    </resource>
+    <resource methods="PUT" protocol="http" uri-template="/users/{userId}">
+        <inSequence>
+            <property expression="get-property('transport', 'activityid')" name="requestId" scope="default" type="STRING"/>
+            <sequence key="AuditSequence"/>
+            <property expression="get-property('uri.var.userId')" name="userId" scope="default" type="STRING"/>
+            <property expression="json-eval($.username)" name="username" scope="default" type="STRING"/>
+            <property expression="json-eval($.email)" name="email" scope="default" type="STRING"/>
+            <sequence key="INT_REQUEST"/>
+            <dbreport description="Update User in Database">
+                <connection>
+                    <pool>
+                        <driver>com.mysql.cj.jdbc.Driver</driver>
+                        <url>jdbc:mysql://localhost:3306/user_management</url>
+                        <user>root</user>
+                        <password>Aya1mahmoud?</password>
+                    </pool>
+                </connection>
+                <statement>
+                    <sql><![CDATA[UPDATE users SET username = ?, email = ? WHERE userId = ?;]]></sql>
+                    <parameter expression="get-property('username')" type="VARCHAR"/>
+                    <parameter expression="get-property('email')" type="VARCHAR"/>
+                    <parameter expression="get-property('userId')" type="INTEGER"/>
+                </statement>
+            </dbreport>
+            <payloadFactory description="Set Response" media-type="json">
+                <format>{ "status": "User updated successfully." }</format>
+                <args/>
+            </payloadFactory>
+            <sequence key="INT_RESPONSE"/>
+            <sequence key="AuditResponseSequence"/>
+            <respond/>
+        </inSequence>
+        <outSequence>
+            <respond/>
+        </outSequence>
+        <faultSequence>
+            <sequence key="AuditFaultSequence"/>
+        </faultSequence>
+    </resource>
+    <resource methods="DELETE" protocol="http" uri-template="/users/{userId}">
+        <inSequence>
+            <property expression="get-property('transport', 'activityid')" name="requestId" scope="default" type="STRING"/>
+            <sequence key="AuditSequence"/>
+            <property expression="get-property('uri.var.userId')" name="userId" scope="default" type="STRING"/>
+            <sequence key="INT_REQUEST"/>
+            <dbreport description="Delete User from Database">
+                <connection>
+                    <pool>
+                        <driver>com.mysql.cj.jdbc.Driver</driver>
+                        <url>jdbc:mysql://localhost:3306/user_management</url>
+                        <user>root</user>
+                        <password>Aya1mahmoud?</password>
+                    </pool>
+                </connection>
+                <statement>
+                    <sql><![CDATA[DELETE FROM users WHERE userId = ?;]]></sql>
+                    <parameter expression="get-property('userId')" type="INTEGER"/>
+                </statement>
+            </dbreport>
+            <payloadFactory description="Set Response" media-type="json">
+                <format>{ "status": "User deleted successfully." }</format>
+                <args/>
+            </payloadFactory>
+            <sequence key="INT_RESPONSE"/>
+            <sequence key="AuditResponseSequence"/>
+            <respond/>
+        </inSequence>
+        <outSequence>
+            <respond/>
+        </outSequence>
+        <faultSequence>
+            <sequence key="AuditFaultSequence"/>
+        </faultSequence>
+    </resource>
+</api>
